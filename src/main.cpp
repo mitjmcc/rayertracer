@@ -14,16 +14,7 @@ int main() {
 
     ofstream imgRender(filename);
 
-    int stb_n = 3;
-    unsigned char img[nx * ny * stb_n];
-    // stbi_load("hello.png" , &nx, &ny, &stb_n, 3)
-    if (!img) {
-        // fprintf( stderr, stbi_failure_reason() );
-        cout << "\n";
-    }
-
-    cout << img[0] << "\n";
-    // imgRender << "P3\n" << nx << " " << ny << "\n255\n";
+    imgRender << "P3\n" << nx << " " << ny << "\n255\n";
     for (int j = ny - 1; j > 0; --j) {
         for (int i = 0; i < nx; ++i) {
             float r = float(i) / float(nx);
@@ -33,12 +24,9 @@ int main() {
             int ig = int(255.99 * g);
             int ib = int(255.99 * b);
 
-            // img[3] = ir; 
-            img << ir << " " << ig << " " << ib << "\n";
+            imgRender << ir << " " << ig << " " << ib << "\n";
         }
     }
 
-
     imgRender.close();
-    // stbi_image_free(img);
 }
