@@ -23,15 +23,26 @@ int main() {
     // PPM Header
     imgRender << "P3\n" << nx << " " << ny << "\n255\n";
     
+    // Near plane definitions
+    vec3 lower_left_corner(-2.0, -1.0, -1.0);
+    vec3 horizontal(4.0, 0.0, 0.0);
+    vec3 vertical(0.0, 2.0, 0.0);
+    vec3 origin(0.0, 0.0, 0.0);
     
-    
+    // Loop through pixels
     for (int j = ny - 1; j > 0; --j) {
         for (int i = 0; i < nx; ++i) {
-            vec3 col(float(i) / float(nx), float(j) / float(ny), 0.2f);
+            // Horizontal and vertical offset vectors
+            float u = float(i) / float(nx);
+            float v = float(j) / float(ny);
+            // Ray through each of the pixels
+            ray r(origin, lower_left_corner + u * horizontal + v * vertical);
+            vec3 col = color(r);
+            // Color scaled to 0 to 255
             int ir = int(255.99 * col[0]);
             int ig = int(255.99 * col[1]);
             int ib = int(255.99 * col[2]);
-
+            // Write color to image
             imgRender << ir << " " << ig << " " << ib << "\n";
         }
     }
