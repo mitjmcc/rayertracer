@@ -22,6 +22,13 @@ bool refract(const vec3 &v, const vec3 &n, float ior, vec3 &refracted) {
     return false;
 }
 
+// schlick fresnel approximation
+float schlick(float cosine, float ref_index) {
+    float r0 = (1 - ref_index) / (1 + ref_index);
+    r0 = r0 * r0;
+    return r0 + (1 - r0) * pow((1 - cosine), 5);
+}
+
 vec3 random_in_unit_sphere() {
     vec3 p;
     do {
@@ -80,21 +87,29 @@ class dialetric : public material {
                              ray &scattered) const {
             vec3 outward_normal;
             vec3 reflected = reflect(r_in.direction(), rec.normal);
-            float ior_ratio = 0.0f;
-            attenuation = vec3(1, 1, 0);
+            float ior_ratio;
+            float cosine;
+            float reflect_prob;
+            attenuation = vec3(1, 1, 1);
             vec3 refracted;
             if (dot(r_in.direction(), rec.normal) > 0) {
                 outward_normal = -rec.normal;
                 ior_ratio = ref_index;
+                cosine = ref_index * dot(r_in.direction(), rec.normal) / r_in.direction().length();
             } else {
                 outward_normal = rec.normal;
                 ior_ratio = 1.0 / ref_index;
+                cosine = -dot(r_in.direction(), rec.normal) / r_in.direction().length();
             }
             if (refract(r_in.direction(), outward_normal, ior_ratio, refracted)) {
-                scattered = ray(rec.p, refracted);
+                reflect_prob = schlick(cosine, ref_index);
             } else {
+                reflect_prob = 1.0f;
+            }
+            if (drand48() < reflect_prob) {
                 scattered = ray(rec.p, reflected);
-                // return false;
+            } else {
+                scattered = ray(rec.p, refracted);
             }
             return true;
         }

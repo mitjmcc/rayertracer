@@ -31,11 +31,11 @@ vec3 color(const ray &r, hitable *world, int depth) {
 
 int main() {
     // Dimensions
-    int nx = 200;
-    int ny = 100;
+    int nx = 400;
+    int ny = 200;
 
     // Number of samples
-    int ns = 50;
+    int ns = 100;
 
     // Output file
     ofstream imgRender(filename);
@@ -44,14 +44,16 @@ int main() {
     imgRender << "P3\n" << nx << " " << ny << "\n255\n";
     
     // Object list
-    hitable *list[4];
+    hitable *list[5];
     list[0] = new sphere(vec3(0,0,-1), 0.5f,      new lambertian(vec3(0.1f, 0.2f, 0.5f)));
     list[1] = new sphere(vec3(0,-100.5f,-1), 100, new lambertian(vec3(0.8f, 0.8f, 0.0f)));
     list[2] = new sphere(vec3(1,0,-1), 0.5f,  new metal(vec3(0.8f, 0.6f, 0.2f), 0.3f));
     list[3] = new sphere(vec3(-1,0,-1), 0.5f, new dialetric(1.5f));
-    hitable *world = new hitable_list(list, 4);
+    list[4] = new sphere(vec3(-1,0,-1), -0.45f, new dialetric(1.5f));
+    hitable *world = new hitable_list(list, 5);
     camera cam;
     int barWidth = 70;
+    float progress = 0;
     // Loop through pixels
     for (int j = ny - 1; j > 0; --j) {
         for (int i = 0; i < nx; ++i) {
@@ -77,9 +79,9 @@ int main() {
             imgRender << ir << " " << ig << " " << ib << "\n";
         }
 
-        // Loading bar
+        // Loading bar https://stackoverflow.com/a/14539953
         cout << "Rendering [";
-        float progress = float(ny - j) / float(ny);
+        progress = float(ny - j) / float(ny);
         int pos = barWidth * progress;
         for (int i = 0; i < barWidth; ++i) {
             if (i < pos) std::cout << "=";
