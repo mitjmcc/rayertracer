@@ -31,8 +31,8 @@ vec3 color(const ray &r, hitable *world, int depth) {
 
 int main() {
     // Dimensions
-    int nx = 400;
-    int ny = 200;
+    int nx = 200;
+    int ny = 100;
 
     // Number of samples
     int ns = 50;
@@ -51,7 +51,7 @@ int main() {
     list[3] = new sphere(vec3(-1,0,-1), 0.5f, new dialetric(1.5f));
     hitable *world = new hitable_list(list, 4);
     camera cam;
-
+    int barWidth = 70;
     // Loop through pixels
     for (int j = ny - 1; j > 0; --j) {
         for (int i = 0; i < nx; ++i) {
@@ -76,7 +76,19 @@ int main() {
             // Write color to image
             imgRender << ir << " " << ig << " " << ib << "\n";
         }
-    }
 
+        // Loading bar
+        cout << "Rendering [";
+        float progress = float(ny - j) / float(ny);
+        int pos = barWidth * progress;
+        for (int i = 0; i < barWidth; ++i) {
+            if (i < pos) std::cout << "=";
+            else if (i == pos) std::cout << ">";
+            else std::cout << " ";
+        }
+        cout << "] " << int(progress * 100.0) << " %\r";
+        cout.flush();
+    }
+    cout << "Finished \n";
     imgRender.close();
 }
