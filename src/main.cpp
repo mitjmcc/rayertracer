@@ -4,25 +4,23 @@
 #include "sphere.h"
 #include "hitable_list.h"
 #include "camera.h"
+#include "material.h"
 #include "float.h"
 
 using namespace std;
 
 string filename = "hello.ppm";
 
-vec3 random_in_unit_sphere() {
-    vec3 p;
-    do {
-        p = 2.0f * vec3(drand48(), drand48(), drand48()) - vec3(1, 1, 1);
-    } while (p.squared_length() >= 1.0f);
-    return p;
-}
-
-vec3 color(const ray &r, hitable *world) {
+vec3 color(const ray &r, hitable *world, int depth) {
     hit_record rec;
     if (world->hit(r, 0.001f, MAXFLOAT, rec)) { // t_min set to near 0 to avoid shadow acne
-        vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-        return 0.5f * color(ray(rec.p, target - rec.p), world);
+        ray scattered;
+        vec3 attenuation;
+        if (depth < 50 && rec.mat_prt->scatter(r, rec, attenuation, scattered)) {
+            return attenuation * color(scattered, world, depth + 1);
+        } else {
+            return vec3(0,0,0);
+        }
     } else {
         // Background color: Lerp from blue to white
         vec3 unit_direction = unit_vector(r.direction());
@@ -33,11 +31,11 @@ vec3 color(const ray &r, hitable *world) {
 
 int main() {
     // Dimensions
-    int nx = 200;
-    int ny = 100;
+    int nx = 400;
+    int ny = 200;
 
     // Number of samples
-    int ns = 100;
+    int ns = 50;
 
     // Output file
     ofstream imgRender(filename);
@@ -46,10 +44,12 @@ int main() {
     imgRender << "P3\n" << nx << " " << ny << "\n255\n";
     
     // Object list
-    hitable *list[2];
-    list[0] = new sphere(vec3(0,0,-1), 0.5f);
-    list[1] = new sphere(vec3(0,-100.5f,-1), 100);
-    hitable *world = new hitable_list(list, 2);
+    hitable *list[4];
+    list[0] = new sphere(vec3(0,0,-1), 0.5f,      new lambertian(vec3(0.1f, 0.2f, 0.5f)));
+    list[1] = new sphere(vec3(0,-100.5f,-1), 100, new lambertian(vec3(0.8f, 0.8f, 0.0f)));
+    list[2] = new sphere(vec3(1,0,-1), 0.5f,  new metal(vec3(0.8f, 0.6f, 0.2f), 0.3f));
+    list[3] = new sphere(vec3(-1,0,-1), 0.5f, new dialetric(1.5f));
+    hitable *world = new hitable_list(list, 4);
     camera cam;
 
     // Loop through pixels
@@ -63,8 +63,7 @@ int main() {
                 float v = float(j + drand48()) / float(ny);
                 // Ray through each sample of each of pixel
                 ray r = cam.get_ray(u, v);
-                vec3 p = r.point_at_parameter(2.0f);
-                col += color(r, world);
+                col += color(r, world, 0);
             }
             // Average color samples
             col /= float(ns);
