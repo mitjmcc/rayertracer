@@ -31,8 +31,8 @@ vec3 color(const ray &r, hitable *world, int depth) {
 
 int main() {
     // Dimensions
-    int nx = 400;
-    int ny = 200;
+    int nx = 200;
+    int ny = 100;
 
     // Number of samples
     int ns = 100;
@@ -51,7 +51,7 @@ int main() {
     list[3] = new sphere(vec3(-1,0,-1), 0.5f, new dialetric(1.5f));
     list[4] = new sphere(vec3(-1,0,-1), -0.45f, new dialetric(1.5f));
     hitable *world = new hitable_list(list, 5);
-    camera cam;
+    camera cam(vec3(-2, 2, 1), vec3(0, 0, -1), vec3(0, 1, 0), 40, float(nx) / float(ny));
     int barWidth = 70;
     float progress = 0;
     // Loop through pixels
