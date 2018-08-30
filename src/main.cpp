@@ -51,7 +51,10 @@ int main() {
     list[3] = new sphere(vec3(-1,0,-1), 0.5f, new dialetric(1.5f));
     list[4] = new sphere(vec3(-1,0,-1), -0.45f, new dialetric(1.5f));
     hitable *world = new hitable_list(list, 5);
-    camera cam(vec3(-2, 2, 1), vec3(0, 0, -1), vec3(0, 1, 0), 40, float(nx) / float(ny));
+    vec3 lookfrom(3, 3, 2), lookat(0, 0, -1);
+    float aperture = 2.0f;
+    float dist_to_focus = (lookfrom - lookat).length();
+    camera cam(lookfrom, lookat, vec3(0, 1, 0), 20, float(nx) / float(ny), aperture, dist_to_focus);
     int barWidth = 70;
     float progress = 0;
     // Loop through pixels
@@ -81,7 +84,7 @@ int main() {
 
         // Loading bar https://stackoverflow.com/a/14539953
         cout << "Rendering [";
-        progress = float(ny - j) / float(ny);
+        progress = float(ny - j) / float(ny) + 0.01f;
         int pos = barWidth * progress;
         for (int i = 0; i < barWidth; ++i) {
             if (i < pos) std::cout << "=";
