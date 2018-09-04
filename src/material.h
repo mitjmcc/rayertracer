@@ -78,9 +78,9 @@ class metal : public material {
         float metallic;
 };
 
-class dialetric : public material {
+class dielectric : public material {
     public:
-        dialetric(float rf) : ref_index(rf) {}
+        dielectric(float rf) : ref_index(rf) {}
         virtual bool scatter(const ray &r_in, 
                              const hit_record &rec,
                              vec3 &attenuation,
