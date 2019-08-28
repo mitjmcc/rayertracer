@@ -21,13 +21,13 @@ hitable *random_scene() {
             float choose_mat = drand48();
             vec3 center(a + 0.9f * drand48(), 0.2f, b + 0.9f * drand48());
             if ((center - vec3(4,0.2f,0)).length() > 0.9f) {
-                if (choose_mat < 0.8f)
-                    list[i++] = new sphere(center, 0.2f,
+                if (choose_mat < 0.8f) // diffuse
+                    list[i++] = new moving_sphere(center, center + vec3(0, 0.5f*drand48(), 0), 0.0f, 1.0f, 0.2f,
                                     new lambertian(vec3(drand48()*drand48(), drand48()*drand48(), drand48()*drand48())));
-                else if (choose_mat < 0.95f)
+                else if (choose_mat < 0.95f) // metal
                     list[i++] = new sphere(vec3(1,0,-1), 0.2f,
                                     new metal(vec3(0.5*(1 + drand48()), 0.5*(1 + drand48()), 0.5*(1 + drand48())),  0.5*drand48()));
-                else
+                else // glass
                     list[i++] = new sphere(center, 0.2f, new dielectric(1.5f));
             } 
         }
@@ -60,11 +60,11 @@ vec3 color(const ray &r, hitable *world, int depth) {
 
 int main() {
     // Dimensions
-    int nx = 1200;
-    int ny = 800;
+    int nx = 600;
+    int ny = 400;
 
     // Number of samples
-    int ns = 15;
+    int ns = 6;
 
     // Output file
     ofstream imgRender(filename);
@@ -75,9 +75,9 @@ int main() {
     // Object list
     hitable *world = random_scene();
     vec3 lookfrom(13, 2, 3), lookat(0, 0, 0);
-    float aperture = 0.1f;
+    float aperture = 0.0f;
     float dist_to_focus = 10.0f;
-    camera cam(lookfrom, lookat, vec3(0, 1, 0), 20, float(nx) / float(ny), aperture, dist_to_focus);
+    camera cam(lookfrom, lookat, vec3(0, 1, 0), 20, float(nx) / float(ny), aperture, dist_to_focus, 0.0, 1.0);
     int barWidth = 70;
     float progress = 0;
     // Loop through pixels
